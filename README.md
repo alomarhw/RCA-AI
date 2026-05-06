@@ -8,8 +8,12 @@ This repository now contains runnable platform code, not only a concept document
 - `src/rca_ai/git_sync.py` implements Overleaf Git clone, pull, branch, commit, and push primitives.
 - `src/rca_ai/latex_indexer.py` extracts sections, citations, labels, figures, and tables from LaTeX projects.
 - `src/rca_ai/ai_agents.py` provides the first deterministic writing/reviewer agents and the seam for model-backed agents.
+ codex/build-research-paper-writing-platform-xn44vq
 - `src/rca_ai/server.py` exposes the browser UI and a small JSON API using the Python standard library.
 - `src/rca_ai/web/` contains the interactive HTML, CSS, and JavaScript frontend.
+
+- `src/rca_ai/server.py` exposes a small JSON API using the Python standard library.
+ main
 - `src/rca_ai/cli.py` provides a command-line interface for local use and development.
 
 ## Quick start
@@ -54,6 +58,7 @@ Generate a reviewable patch suggestion:
 rca-ai suggest PROJECT_ID main.tex "Review the paper for clarity and missing structure." --agent-type reviewer
 ```
 
+ codex/build-research-paper-writing-platform-xn44vq
 Run the browser UI and local JSON API:
 
 ```bash
@@ -81,6 +86,13 @@ After running `rca-ai serve --host 127.0.0.1 --port 8080`, open <http://127.0.0.
 
 The demo button creates a sample project under `.rca-ai/workspaces/` so you can interact with the app before adding Overleaf credentials.
 
+Run the local JSON API:
+
+```bash
+rca-ai serve --host 127.0.0.1 --port 8080
+curl http://127.0.0.1:8080/health
+```
+ main
 ## Product vision
 
 Build a collaborative writing environment for academic teams that can:

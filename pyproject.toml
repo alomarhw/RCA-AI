@@ -19,6 +19,8 @@ where = ["src"]
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
+codex/build-research-paper-writing-platform-xn44vq
 
 [tool.setuptools.package-data]
 rca_ai = ["web/*"]
+main
