@@ -8,12 +8,8 @@ This repository now contains runnable platform code, not only a concept document
 - `src/rca_ai/git_sync.py` implements Overleaf Git clone, pull, branch, commit, and push primitives.
 - `src/rca_ai/latex_indexer.py` extracts sections, citations, labels, figures, and tables from LaTeX projects.
 - `src/rca_ai/ai_agents.py` provides the first deterministic writing/reviewer agents and the seam for model-backed agents.
- codex/build-research-paper-writing-platform-xn44vq
 - `src/rca_ai/server.py` exposes the browser UI and a small JSON API using the Python standard library.
 - `src/rca_ai/web/` contains the interactive HTML, CSS, and JavaScript frontend.
-
-- `src/rca_ai/server.py` exposes a small JSON API using the Python standard library.
- main
 - `src/rca_ai/cli.py` provides a command-line interface for local use and development.
 
 ## Quick start
@@ -30,6 +26,142 @@ Run the test suite:
 ```bash
 PYTHONPATH=src pytest -q
 ```
+
+
+## Troubleshooting installation
+
+### `TOMLDecodeError` while running `pip install -e .`
+
+If `pip install -e .` fails with an error like `tomllib.TOMLDecodeError: Expected '=' after a key in a key/value pair`, your local `pyproject.toml` is malformed. This commonly happens after a manual GitHub conflict resolution leaves conflict text or prose in the TOML file.
+
+Fastest fix: replace your local `pyproject.toml` with the known-good version below, then run `pip install -e .` again. From the repository root, paste this whole block:
+
+```bash
+cat > pyproject.toml <<'EOF'
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rca-ai"
+version = "0.1.0"
+description = "AI-assisted research-paper writing platform with Overleaf Git synchronization."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "RCA-AI" }]
+
+[project.scripts]
+rca-ai = "rca_ai.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.setuptools.package-data]
+rca_ai = ["web/*"]
+EOF
+```
+
+If you prefer to inspect before replacing it, check the file around the reported line:
+
+```bash
+nl -ba pyproject.toml | sed -n '1,80p'
+```
+
+The file should contain valid TOML like this near the end:
+
+```toml
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.setuptools.package-data]
+rca_ai = ["web/*"]
+```
+
+Make sure there are no merge-conflict markers or stray text, especially lines like:
+
+```text
+< < < < < < < HEAD
+= = = = = = =
+> > > > > > > branch-name
+```
+
+After fixing the file, validate it and retry installation:
+
+```bash
+python3 - <<'PY'
+import tomllib
+from pathlib import Path
+tomllib.loads(Path("pyproject.toml").read_text())
+print("pyproject.toml is valid")
+PY
+pip install -e .
+```
+
+
+### `IndentationError` in `src/rca_ai/platform.py`
+
+If `rca-ai --help`, `pytest`, or `rca-ai serve` fails with `IndentationError: unexpected indent` in `src/rca_ai/platform.py`, your local source file is malformed. This is usually another sign that the GitHub conflict resolution or a manual copy/paste changed indentation in the Python file.
+
+First inspect the area Python reports:
+
+```bash
+nl -ba src/rca_ai/platform.py | sed -n '20,45p'
+```
+
+The method definitions inside `class ResearchPaperPlatform` should be indented exactly four spaces, for example:
+
+```python
+    def create_project(self, name: str, overleaf_git_url: str, default_branch: str = "main") -> Project:
+        project = Project(name=name, overleaf_git_url=overleaf_git_url, default_branch=default_branch)
+        return self.store.save_project(project)
+
+    def create_demo_project(self, name: str = "Demo Research Paper") -> Project:
+        """Create a local demo LaTeX project so users can try RCA-AI without Overleaf."""
+```
+
+If your file has extra spaces before `def create_demo_project`, conflict markers, or stray text, restore the file from Git and retry:
+
+```bash
+git restore src/rca_ai/platform.py
+python3 -m py_compile src/rca_ai/platform.py
+rca-ai --help
+```
+
+If `git restore` does not fix it because your branch already contains the bad conflict resolution, pull the latest fixed branch from GitHub or replace `src/rca_ai/platform.py` with the version from the repository before running the compile check again.
+
+
+### `argparse.ArgumentError: conflicting subparser: serve`
+
+If `rca-ai --help` fails with `argparse.ArgumentError: conflicting subparser: serve`, your local `src/rca_ai/cli.py` contains two `subcommands.add_parser("serve", ...)` blocks. This can happen if a conflict was resolved by keeping both versions of the `serve` command.
+
+Inspect the CLI file:
+
+```bash
+nl -ba src/rca_ai/cli.py | sed -n '35,60p'
+```
+
+There should be exactly one `serve` parser block:
+
+```python
+    serve = subcommands.add_parser("serve", help="Run the browser UI and JSON API")
+    serve.add_argument("--host", default="127.0.0.1")
+    serve.add_argument("--port", type=int, default=8080)
+```
+
+If you see a second block such as `help="Run the minimal JSON HTTP API"`, delete the duplicate or restore the file from Git:
+
+```bash
+git restore src/rca_ai/cli.py
+python3 -m py_compile src/rca_ai/cli.py
+rca-ai --help
+```
+
+If `git restore` does not fix it because your branch already contains the duplicate, pull the latest fixed branch from GitHub or replace `src/rca_ai/cli.py` with the repository version.
 
 ## CLI usage
 
@@ -58,7 +190,6 @@ Generate a reviewable patch suggestion:
 rca-ai suggest PROJECT_ID main.tex "Review the paper for clarity and missing structure." --agent-type reviewer
 ```
 
- codex/build-research-paper-writing-platform-xn44vq
 Run the browser UI and local JSON API:
 
 ```bash
@@ -86,13 +217,6 @@ After running `rca-ai serve --host 127.0.0.1 --port 8080`, open <http://127.0.0.
 
 The demo button creates a sample project under `.rca-ai/workspaces/` so you can interact with the app before adding Overleaf credentials.
 
-Run the local JSON API:
-
-```bash
-rca-ai serve --host 127.0.0.1 --port 8080
-curl http://127.0.0.1:8080/health
-```
- main
 ## Product vision
 
 Build a collaborative writing environment for academic teams that can:

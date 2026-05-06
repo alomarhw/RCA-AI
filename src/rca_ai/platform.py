@@ -26,7 +26,6 @@ class ResearchPaperPlatform:
         project = Project(name=name, overleaf_git_url=overleaf_git_url, default_branch=default_branch)
         return self.store.save_project(project)
 
-codex/build-research-paper-writing-platform-xn44vq
 
     def create_demo_project(self, name: str = "Demo Research Paper") -> Project:
         """Create a local demo LaTeX project so users can try RCA-AI without Overleaf."""
@@ -77,7 +76,6 @@ The demo workflow shows section extraction, citation detection, and reviewer-sty
         project.mark_updated()
         return self.store.save_project(project)
 
-main
     def list_projects(self) -> list[Project]:
         return self.store.list_projects()
 
