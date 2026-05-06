@@ -26,6 +26,58 @@ class ResearchPaperPlatform:
         project = Project(name=name, overleaf_git_url=overleaf_git_url, default_branch=default_branch)
         return self.store.save_project(project)
 
+codex/build-research-paper-writing-platform-xn44vq
+
+    def create_demo_project(self, name: str = "Demo Research Paper") -> Project:
+        """Create a local demo LaTeX project so users can try RCA-AI without Overleaf."""
+
+        project = Project(
+            name=name,
+            overleaf_git_url="demo://local-overleaf-project",
+            default_branch="main",
+            status=ProjectStatus.CLONED,
+        )
+        project_path = self.workspace_root / project.id
+        project_path.mkdir(parents=True, exist_ok=True)
+        (project_path / "main.tex").write_text(
+            r"""\documentclass{article}
+\title{RCA-AI Demo Paper}
+\author{Research Team}
+\begin{document}
+\maketitle
+\begin{abstract}
+This short demo paper illustrates how RCA-AI indexes LaTeX and proposes review notes.
+\end{abstract}
+\section{Introduction}
+Writing strong research papers requires clear motivation, evidence, and careful positioning against prior work \cite{demo2026}.
+\section{Method}
+Our prototype synchronizes projects, indexes manuscript structure, and creates reviewable suggestions.
+\section{Results}
+The demo workflow shows section extraction, citation detection, and reviewer-style feedback.
+\begin{figure}
+\caption{Demo RCA-AI workflow}
+\label{fig:workflow}
+\end{figure}
+\bibliographystyle{plain}
+\bibliography{refs}
+\end{document}
+""",
+            encoding="utf-8",
+        )
+        (project_path / "refs.bib").write_text(
+            """@misc{demo2026,
+  title = {RCA-AI Demo Reference},
+  author = {RCA-AI Team},
+  year = {2026}
+}
+""",
+            encoding="utf-8",
+        )
+        project.workspace_path = str(project_path)
+        project.mark_updated()
+        return self.store.save_project(project)
+
+main
     def list_projects(self) -> list[Project]:
         return self.store.list_projects()
 

@@ -35,3 +35,17 @@ This is a draft with \cite{paper2026}.
     assert "RCA-AI reviewer note" in patch.diff
     assert patch.file_path == "main.tex"
     assert "Review the manuscript" in patch.rationale
+codex/build-research-paper-writing-platform-xn44vq
+
+
+def test_platform_creates_demo_project_that_can_be_indexed(tmp_path: Path) -> None:
+    platform = ResearchPaperPlatform(tmp_path / "data")
+
+    project = platform.create_demo_project("Interactive Demo")
+    index = platform.index_project(project.id, root_file="main.tex")
+
+    assert project.workspace_path is not None
+    assert index.root_file == "main.tex"
+    assert any(section["title"] == "Introduction" for section in index.sections)
+    assert "demo2026" in index.citations
+main
