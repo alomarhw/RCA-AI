@@ -1,6 +1,64 @@
 # RCA-AI
 
-RCA-AI is a proposed AI-assisted research-paper writing platform that helps researchers draft, revise, review, cite, and polish high-quality manuscripts while keeping their LaTeX projects synchronized with Overleaf.
+RCA-AI is an initial implementation of an AI-assisted research-paper writing platform. It helps researchers register Overleaf Git projects, clone/pull LaTeX manuscripts, index paper structure, and generate reviewable AI-assistance patches that can be approved before being pushed back to Overleaf.
+
+This repository now contains runnable platform code, not only a concept document:
+
+- `src/rca_ai/platform.py` exposes the application service layer.
+- `src/rca_ai/git_sync.py` implements Overleaf Git clone, pull, branch, commit, and push primitives.
+- `src/rca_ai/latex_indexer.py` extracts sections, citations, labels, figures, and tables from LaTeX projects.
+- `src/rca_ai/ai_agents.py` provides the first deterministic writing/reviewer agents and the seam for model-backed agents.
+- `src/rca_ai/server.py` exposes a small JSON API using the Python standard library.
+- `src/rca_ai/cli.py` provides a command-line interface for local use and development.
+
+## Quick start
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -e .
+rca-ai --help
+```
+
+Run the test suite:
+
+```bash
+PYTHONPATH=src pytest -q
+```
+
+## CLI usage
+
+Register an Overleaf Git project:
+
+```bash
+rca-ai create-project "My Paper" "https://git.overleaf.com/YOUR_PROJECT_ID"
+```
+
+Clone the project. The token can be provided by environment variable so it does not appear in shell history:
+
+```bash
+export OVERLEAF_GIT_TOKEN="YOUR_OVERLEAF_GIT_TOKEN"
+rca-ai clone PROJECT_ID
+```
+
+Index the manuscript:
+
+```bash
+rca-ai index PROJECT_ID --root-file main.tex
+```
+
+Generate a reviewable patch suggestion:
+
+```bash
+rca-ai suggest PROJECT_ID main.tex "Review the paper for clarity and missing structure." --agent-type reviewer
+```
+
+Run the local JSON API:
+
+```bash
+rca-ai serve --host 127.0.0.1 --port 8080
+curl http://127.0.0.1:8080/health
+```
 
 ## Product vision
 
@@ -14,7 +72,7 @@ Build a collaborative writing environment for academic teams that can:
 
 ## Overleaf integration approach
 
-Overleaf projects can be treated as Git remotes when Git integration is available. The platform should use this path instead of relying on unofficial editor endpoints:
+Overleaf projects can be treated as Git remotes when Git integration is available. The platform uses this path instead of relying on unofficial editor endpoints:
 
 1. The user connects an Overleaf project by providing its Git URL and an Overleaf Git authentication token.
 2. RCA-AI clones the project into an isolated workspace.
@@ -46,16 +104,14 @@ flowchart LR
 
 ## MVP feature set
 
-| Area | MVP capability | Notes |
+| Area | Implemented now | Next production step |
 | --- | --- | --- |
-| Project sync | Clone, pull, branch, commit, and push Overleaf Git projects | Start with one project per workspace. |
-| LaTeX parsing | Detect `main.tex`, included files, sections, labels, citations, figures, and tables | Use AST-aware parsing where possible and fall back to conservative text patches. |
-| AI drafting | Generate outlines, abstracts, introductions, related-work drafts, and conclusion drafts | Require user-provided claims, results, and citation context. |
-| AI revision | Improve clarity, flow, grammar, structure, and concision without changing meaning | Return diffs rather than replacing whole files blindly. |
-| Reviewer agent | Produce novelty, clarity, methodology, threat-to-validity, and contribution critiques | Provide actionable comments linked to sections. |
-| Citation support | Identify missing citations, unused citations, weak citation contexts, and bibliography issues | Do not fabricate references; require retrieval-backed suggestions. |
-| Quality gates | Run LaTeX build checks, linting, broken-reference checks, and bibliography checks | Block push on unsafe or uncompilable changes unless overridden. |
-| Audit trail | Track prompts, generated suggestions, accepted patches, commits, and author approvals | Needed for trust, reproducibility, and institutional review. |
+| Project sync | Register projects and run Git clone, pull, branch, commit, and push commands | Add encrypted token vault, conflict UI, and background job retries. |
+| LaTeX parsing | Detect root file, included files, sections, labels, citations, figures, and tables | Add AST-aware parsing and build-log line mapping. |
+| AI drafting/revision | Generate deterministic reviewer/outline/comment diffs as a safe local fallback | Connect model provider, retrieval, and structured patch validation. |
+| Review workflow | Return unified diffs with rationale and risk level | Add browser diff viewer and explicit accept/reject persistence. |
+| Quality gates | Unit tests cover sync helpers, indexing, and patch generation | Add `latexmk`, bibliography checks, and push-blocking validation. |
+| Audit trail | Domain models include request and patch IDs/timestamps | Persist prompts, model outputs, decisions, and Git commit mappings. |
 
 ## Suggested system architecture
 
@@ -111,6 +167,8 @@ flowchart TB
 | Consistency checker | Finds mismatched terminology, numbers, claims, acronyms, and notation | Must cite the conflicting locations before suggesting changes. |
 
 ## Data model sketch
+
+The implementation currently uses dependency-free dataclasses and local JSON storage so it can run immediately. These map cleanly to the production tables below:
 
 ```text
 User
