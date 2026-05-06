@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RCA-AI Research Writing Platform</title>
+    <link rel="stylesheet" href="/static/app.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <nav class="nav">
+        <div class="brand">
+          <span class="brand-mark">R</span>
+          <div>
+            <strong>RCA-AI</strong>
+            <small>Research paper assistant</small>
+          </div>
+        </div>
+        <button id="refreshProjects" class="secondary">Refresh projects</button>
+      </nav>
+      <section class="hero-grid">
+        <div>
+          <p class="eyebrow">Overleaf + LaTeX + AI review</p>
+          <h1>Write stronger research papers with reviewable AI suggestions.</h1>
+          <p class="hero-copy">
+            Register an Overleaf Git project, clone it locally, index the LaTeX manuscript,
+            and generate author-approved review diffs without leaving the browser.
+          </p>
+          <div class="hero-actions">
+            <button id="createDemo" class="primary">Create demo paper</button>
+            <a class="secondary link-button" href="#projectForm">Connect Overleaf project</a>
+          </div>
+        </div>
+        <div class="status-card">
+          <span class="status-pill">Prototype running</span>
+          <h2>Try it without Overleaf</h2>
+          <p>
+            Click <strong>Create demo paper</strong>, then select it, index the manuscript,
+            and generate a reviewer patch.
+          </p>
+        </div>
+      </section>
+    </header>
+
+    <main class="layout">
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Step 1</p>
+            <h2>Projects</h2>
+          </div>
+          <span id="projectCount" class="count">0</span>
+        </div>
+        <form id="projectForm" class="stack">
+          <label>
+            Project name
+            <input name="name" placeholder="My Research Paper" required />
+          </label>
+          <label>
+            Overleaf Git URL
+            <input name="overleaf_git_url" placeholder="https://git.overleaf.com/YOUR_PROJECT_ID" required />
+          </label>
+          <label>
+            Default branch
+            <input name="default_branch" value="main" />
+          </label>
+          <button class="primary" type="submit">Register project</button>
+        </form>
+        <div id="projects" class="project-list"></div>
+      </section>
+
+      <section class="panel wide">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Step 2</p>
+            <h2>Manuscript workspace</h2>
+          </div>
+          <span id="selectedProjectName" class="muted">No project selected</span>
+        </div>
+
+        <div class="workspace-grid">
+          <form id="cloneForm" class="stack cardlet">
+            <h3>Clone from Overleaf</h3>
+            <p class="muted">For real Overleaf projects, paste a Git token. Demo projects do not need this.</p>
+            <label>
+              Overleaf Git token
+              <input name="token" type="password" placeholder="Optional token" />
+            </label>
+            <button class="secondary" type="submit">Clone selected project</button>
+          </form>
+
+          <form id="indexForm" class="stack cardlet">
+            <h3>Index manuscript</h3>
+            <label>
+              Root LaTeX file
+              <input name="root_file" value="main.tex" />
+            </label>
+            <button class="secondary" type="submit">Index selected project</button>
+          </form>
+
+          <form id="suggestForm" class="stack cardlet">
+            <h3>Generate AI review</h3>
+            <label>
+              Target file
+              <input name="target_file" value="main.tex" />
+            </label>
+            <label>
+              Agent type
+              <select name="agent_type">
+                <option value="reviewer">Reviewer</option>
+                <option value="outline">Outline</option>
+                <option value="clarity">Clarity</option>
+              </select>
+            </label>
+            <label>
+              Prompt
+              <textarea name="prompt" rows="3">Review the paper for clarity, missing structure, and citation coverage.</textarea>
+            </label>
+            <button class="primary" type="submit">Generate patch</button>
+          </form>
+        </div>
+
+        <div class="results-grid">
+          <article class="result-card">
+            <h3>Index result</h3>
+            <pre id="indexOutput">Select a project and click “Index selected project”.</pre>
+          </article>
+          <article class="result-card">
+            <h3>Suggested patch</h3>
+            <pre id="patchOutput">Generate a patch to see the unified diff here.</pre>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="/static/app.js"></script>
+  </body>
+</html>
