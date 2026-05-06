@@ -21,9 +21,11 @@ def main(argv: list[str] | None = None) -> int:
     create.add_argument("overleaf_git_url")
     create.add_argument("--default-branch", default="main")
 
+codex/build-research-paper-writing-platform-xn44vq
     demo = subcommands.add_parser("create-demo", help="Create a local demo LaTeX project")
     demo.add_argument("--name", default="Demo Research Paper")
 
+main
     subcommands.add_parser("list-projects", help="List registered projects")
 
     clone = subcommands.add_parser("clone", help="Clone an Overleaf Git project")
@@ -44,7 +46,11 @@ def main(argv: list[str] | None = None) -> int:
     suggest.add_argument("--agent-type", default="clarity")
     suggest.add_argument("--root-file")
 
+codex/build-research-paper-writing-platform-xn44vq
     serve = subcommands.add_parser("serve", help="Run the browser UI and JSON API")
+
+    serve = subcommands.add_parser("serve", help="Run the minimal JSON HTTP API")
+main
     serve.add_argument("--host", default="127.0.0.1")
     serve.add_argument("--port", type=int, default=8080)
 
@@ -53,8 +59,11 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "create-project":
         return _print(platform.create_project(args.name, args.overleaf_git_url, args.default_branch).to_dict())
+codex/build-research-paper-writing-platform-xn44vq
     if args.command == "create-demo":
         return _print(platform.create_demo_project(args.name).to_dict())
+
+main
     if args.command == "list-projects":
         return _print([project.to_dict() for project in platform.list_projects()])
     if args.command == "clone":

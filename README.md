@@ -8,8 +8,12 @@ This repository now contains runnable platform code, not only a concept document
 - `src/rca_ai/git_sync.py` implements Overleaf Git clone, pull, branch, commit, and push primitives.
 - `src/rca_ai/latex_indexer.py` extracts sections, citations, labels, figures, and tables from LaTeX projects.
 - `src/rca_ai/ai_agents.py` provides the first deterministic writing/reviewer agents and the seam for model-backed agents.
+ codex/build-research-paper-writing-platform-xn44vq
 - `src/rca_ai/server.py` exposes the browser UI and a small JSON API using the Python standard library.
 - `src/rca_ai/web/` contains the interactive HTML, CSS, and JavaScript frontend.
+
+- `src/rca_ai/server.py` exposes a small JSON API using the Python standard library.
+ main
 - `src/rca_ai/cli.py` provides a command-line interface for local use and development.
 
 ## Quick start
@@ -25,50 +29,6 @@ Run the test suite:
 
 ```bash
 PYTHONPATH=src pytest -q
-```
-
-
-## Troubleshooting installation
-
-### `TOMLDecodeError` while running `pip install -e .`
-
-If `pip install -e .` fails with an error like `tomllib.TOMLDecodeError: Expected '=' after a key in a key/value pair`, your local `pyproject.toml` is malformed. This commonly happens after a manual GitHub conflict resolution leaves conflict text or prose in the TOML file.
-
-Check the file around the reported line:
-
-```bash
-nl -ba pyproject.toml | sed -n '1,80p'
-```
-
-The file should contain valid TOML like this near the end:
-
-```toml
-[tool.pytest.ini_options]
-pythonpath = ["src"]
-testpaths = ["tests"]
-
-[tool.setuptools.package-data]
-rca_ai = ["web/*"]
-```
-
-Make sure there are no merge-conflict markers or stray text, especially lines like:
-
-```text
-< < < < < < < HEAD
-= = = = = = =
-> > > > > > > branch-name
-```
-
-After fixing the file, validate it and retry installation:
-
-```bash
-python3 - <<'PY'
-import tomllib
-from pathlib import Path
-tomllib.loads(Path("pyproject.toml").read_text())
-print("pyproject.toml is valid")
-PY
-pip install -e .
 ```
 
 ## CLI usage
@@ -98,6 +58,7 @@ Generate a reviewable patch suggestion:
 rca-ai suggest PROJECT_ID main.tex "Review the paper for clarity and missing structure." --agent-type reviewer
 ```
 
+ codex/build-research-paper-writing-platform-xn44vq
 Run the browser UI and local JSON API:
 
 ```bash
@@ -125,6 +86,13 @@ After running `rca-ai serve --host 127.0.0.1 --port 8080`, open <http://127.0.0.
 
 The demo button creates a sample project under `.rca-ai/workspaces/` so you can interact with the app before adding Overleaf credentials.
 
+Run the local JSON API:
+
+```bash
+rca-ai serve --host 127.0.0.1 --port 8080
+curl http://127.0.0.1:8080/health
+```
+ main
 ## Product vision
 
 Build a collaborative writing environment for academic teams that can:
